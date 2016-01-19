@@ -762,11 +762,6 @@ static S3Status compose_uri(char *buffer, int bufferSize,
     int len = 0;
     int i;
 
-/*
- * Rich
- */
-char *service_path = "services/Walrus";
-
     /*
      * zero out buffer to start
      */
@@ -794,12 +789,22 @@ char *service_path = "services/Walrus";
             uri_append("%s.%s", bucketContext->bucketName, hostName);
         }
         else {
-/*
- * Rich
- **/
-//            uri_append("%s/%s", hostName, bucketContext->bucketName);
-            uri_append("%s/%s/%s", hostName, service_path, 
+		/*
+	 	 * Rich
+	 	 * if there is no service path string, just append the 
+	 	 * bucket name
+	         */
+		if(bucketContext->servicePath == NULL) {
+            		uri_append("%s/%s", hostName, 
+					bucketContext->bucketName);
+		} else {
+		/* if the servicePath string is present, use it.  This allows 
+         	 * dotted host notation in the URL
+         	 */
+            		uri_append("%s/%s/%s", hostName, 
+				bucketContext->servicePath, 
 				bucketContext->bucketName);
+		}
 
         }
     }

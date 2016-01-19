@@ -220,8 +220,19 @@ static gpointer s3store_new(const gchar *path)
     /*
      * either uri styl works as long as Eucalyptus has DNS enabled
      */
-    store->bucket.uriStyle = S3UriStyleVirtualHost;
-//    store->bucket.uriStyle = S3UriStylePath;
+//    store->bucket.uriStyle = S3UriStyleVirtualHost;
+    store->bucket.uriStyle = S3UriStylePath;
+
+    /*
+     * For Eucalyptus, the hostname may be dotted notation in which
+     * case the service path must be present when S3UriStylePath is set
+     */
+    if(store->bucket.uriStyle == S3UriStylePath) {
+	store->bucket.servicePath = getenv("S3_SERVICEPATH");
+	if(store->bucket.servicePath == NULL) {
+		g_error("uriStyle set to S3UriStylePath but no service path specified.  Set S3_SERVICEPATH in the environment");
+		exit(1);
+	}
 
     /*
      * Eucalyptus hostname for Walrus might be the target
