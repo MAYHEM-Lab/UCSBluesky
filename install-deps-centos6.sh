@@ -29,6 +29,6 @@ cd /etc/yum.repos.d/
 wget http://s3tools.org/repo/RHEL_6/s3tools.repo
 yum -y install s3cmd
 
-cd $HERE
-git clone https://github.com/bji/libs3.git
+#cd $HERE
+#git clone https://github.com/bji/libs3.git
 
