@@ -687,6 +687,12 @@ typedef struct S3BucketContext
     S3UriStyle uriStyle;
 
     /**
+     * if the uriStyle is set to S3UriStylePath then there may be
+     * a service path string
+     **/
+    const char *servicePath;
+
+    /**
      * The Amazon Access Key ID to use for access to the bucket
      **/
     const char *accessKeyId;
@@ -1642,7 +1648,9 @@ S3Status S3_generate_authenticated_query_string
  **/
 void S3_list_service(S3Protocol protocol, const char *accessKeyId,
                      const char *secretAccessKey, const char *securityToken,
-                     const char *hostName, S3RequestContext *requestContext,
+                     const char *hostName, 
+		     const char *servicePath,
+		     S3RequestContext *requestContext,
                      const S3ListServiceHandler *handler,
                      void *callbackData);
                          
@@ -1685,6 +1693,7 @@ void S3_list_service(S3Protocol protocol, const char *accessKeyId,
 void S3_test_bucket(S3Protocol protocol, S3UriStyle uriStyle,
                     const char *accessKeyId, const char *secretAccessKey,
                     const char *securityToken, const char *hostName, 
+		    const char *servicePath,
                     const char *bucketName, int locationConstraintReturnSize,
                     char *locationConstraintReturn,
                     S3RequestContext *requestContext,
@@ -1717,7 +1726,9 @@ void S3_test_bucket(S3Protocol protocol, S3UriStyle uriStyle,
  **/
 void S3_create_bucket(S3Protocol protocol, const char *accessKeyId,
                       const char *secretAccessKey, const char *securityToken,
-                      const char *hostName, const char *bucketName,
+                      const char *hostName, 
+		      const char *servicePath,
+		      const char *bucketName,
                       S3CannedAcl cannedAcl, const char *locationConstraint,
                       S3RequestContext *requestContext,
                       const S3ResponseHandler *handler, void *callbackData);
@@ -1749,6 +1760,7 @@ void S3_create_bucket(S3Protocol protocol, const char *accessKeyId,
 void S3_delete_bucket(S3Protocol protocol, S3UriStyle uriStyle,
                       const char *accessKeyId, const char *secretAccessKey,
                       const char *securityToken, const char *hostName, 
+		      const char *servicePath,
                       const char *bucketName, S3RequestContext *requestContext,
                       const S3ResponseHandler *handler, void *callbackData);
 

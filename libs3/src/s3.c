@@ -62,6 +62,7 @@ static int forceG = 0;
 static int showResponsePropertiesG = 0;
 static S3Protocol protocolG = S3ProtocolHTTPS;
 static S3UriStyle uriStyleG = S3UriStylePath;
+static const char *servicePathG = NULL;
 static int retriesG = 5;
 
 
@@ -739,6 +740,7 @@ static struct option longOptionsG[] =
     { "unencrypted",          no_argument,        0,  'u' },
     { "show-properties",      no_argument,        0,  's' },
     { "retries",              required_argument,  0,  'r' },
+    { "servicePath",          required_argument,  0,  'p' },
     { 0,                      0,                  0,   0  }
 };
 
@@ -910,7 +912,7 @@ static void list_service(int allDetails)
     };
 
     do {
-        S3_list_service(protocolG, accessKeyIdG, secretAccessKeyG, 0, 0, 0, 
+        S3_list_service(protocolG, accessKeyIdG, secretAccessKeyG, 0, 0, 0, 0, 
                         &listServiceHandler, &data);
     } while (S3_status_is_retryable(statusG) && should_retry());
 
@@ -954,7 +956,7 @@ static void test_bucket(int argc, char **argv, int optindex)
     char locationConstraint[64];
     do {
         S3_test_bucket(protocolG, uriStyleG, accessKeyIdG, secretAccessKeyG, 0,
-                       0, bucketName, sizeof(locationConstraint),
+                       0, servicePathG, bucketName, sizeof(locationConstraint),
                        locationConstraint, 0, &responseHandler, 0);
     } while (S3_status_is_retryable(statusG) && should_retry());
 
@@ -1053,7 +1055,7 @@ static void create_bucket(int argc, char **argv, int optindex)
 
     do {
         S3_create_bucket(protocolG, accessKeyIdG, secretAccessKeyG, 0,
-                         0, bucketName, cannedAcl, locationConstraint, 0,
+                         0, 0, bucketName, cannedAcl, locationConstraint, 0,
                          &responseHandler, 0);
     } while (S3_status_is_retryable(statusG) && should_retry());
 
@@ -1093,7 +1095,7 @@ static void delete_bucket(int argc, char **argv, int optindex)
 
     do {
         S3_delete_bucket(protocolG, uriStyleG, accessKeyIdG, secretAccessKeyG,
-                         0, 0, bucketName, 0, &responseHandler, 0);
+                         0, 0, servicePathG, bucketName, 0, &responseHandler, 0);
     } while (S3_status_is_retryable(statusG) && should_retry());
 
     if (statusG != S3StatusOK) {
@@ -1248,6 +1250,7 @@ static void list_bucket(const char *bucketName, const char *prefix,
         bucketName,
         protocolG,
         uriStyleG,
+	servicePathG,
         accessKeyIdG,
         secretAccessKeyG,
         0
@@ -1681,6 +1684,7 @@ static void list_multipart_uploads(int argc, char **argv, int optindex)
             bucketName,
             protocolG,
             uriStyleG,
+	    servicePathG,
             accessKeyIdG,
             secretAccessKeyG,
             0
@@ -1798,6 +1802,7 @@ static void list_parts(int argc, char **argv, int optindex)
             bucketName,
             protocolG,
             uriStyleG,
+	    servicePathG,
             accessKeyIdG,
             secretAccessKeyG,
             0
@@ -1894,6 +1899,7 @@ static void abort_multipart_upload(int argc, char **argv, int optindex)
             bucketName,
             protocolG,
             uriStyleG,
+	    NULL,
             accessKeyIdG,
             secretAccessKeyG,
             0
@@ -1962,6 +1968,7 @@ static void delete_object(int argc, char **argv, int optindex)
         bucketName,
         protocolG,
         uriStyleG,
+	servicePathG,
         accessKeyIdG,
         secretAccessKeyG,
         0
@@ -2083,6 +2090,7 @@ static int try_get_parts_info(const char *bucketName, const char *key,
         bucketName,
         protocolG,
         uriStyleG,
+	servicePathG,
         accessKeyIdG,
         secretAccessKeyG,
         0
@@ -2336,6 +2344,7 @@ static void put_object(int argc, char **argv, int optindex)
         bucketName,
         protocolG,
         uriStyleG,
+	servicePathG,
         accessKeyIdG,
         secretAccessKeyG,
         0
@@ -2647,6 +2656,7 @@ static void copy_object(int argc, char **argv, int optindex)
         sourceBucketName,
         protocolG,
         uriStyleG,
+	servicePathG,
         accessKeyIdG,
         secretAccessKeyG,
         0
@@ -2829,6 +2839,7 @@ static void get_object(int argc, char **argv, int optindex)
         bucketName,
         protocolG,
         uriStyleG,
+	servicePathG,
         accessKeyIdG,
         secretAccessKeyG,
         0
@@ -2904,6 +2915,7 @@ static void head_object(int argc, char **argv, int optindex)
         bucketName,
         protocolG,
         uriStyleG,
+	servicePathG,
         accessKeyIdG,
         secretAccessKeyG,
         0
@@ -2984,6 +2996,7 @@ static void generate_query_string(int argc, char **argv, int optindex)
         bucketName,
         protocolG,
         uriStyleG,
+	servicePathG,
         accessKeyIdG,
         secretAccessKeyG,
         0
@@ -3087,6 +3100,7 @@ void get_acl(int argc, char **argv, int optindex)
         bucketName,
         protocolG,
         uriStyleG,
+	servicePathG,
         accessKeyIdG,
         secretAccessKeyG,
         0
@@ -3251,6 +3265,7 @@ void set_acl(int argc, char **argv, int optindex)
         bucketName,
         protocolG,
         uriStyleG,
+	servicePathG,
         accessKeyIdG,
         secretAccessKeyG,
         0
@@ -3344,6 +3359,7 @@ void get_logging(int argc, char **argv, int optindex)
         bucketName,
         protocolG,
         uriStyleG,
+	servicePathG,
         accessKeyIdG,
         secretAccessKeyG,
         0
@@ -3511,6 +3527,7 @@ void set_logging(int argc, char **argv, int optindex)
         bucketName,
         protocolG,
         uriStyleG,
+	servicePathG,
         accessKeyIdG,
         secretAccessKeyG,
         0
@@ -3543,7 +3560,7 @@ int main(int argc, char **argv)
     // Parse args
     while (1) {
         int idx = 0;
-        int c = getopt_long(argc, argv, "fhusr:", longOptionsG, &idx);
+        int c = getopt_long(argc, argv, "fhusr:p:", longOptionsG, &idx);
 
         if (c == -1) {
             // End of options
@@ -3573,6 +3590,10 @@ int main(int argc, char **argv)
             }
             break;
         }
+	case 'p': {
+		servicePathG = strdup(optarg);
+	   }
+	   break;
         default:
             fprintf(stderr, "\nERROR: Unknown option: -%c\n", c);
             // Usage exit
