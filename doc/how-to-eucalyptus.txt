@@ -12,8 +12,11 @@ turn, uses easy_curl and easy_curl implements "Expect: 100-continue" two-part
 messaging protocol on some PUT operations.  Prior versions of Eucalyptus send
 back a "200 OK" message on these PUTs which easy_curl rejects.
 
-Also, the Eucalyptus cloud must be configured to use DNS support since libs3
-can't deal with dotted IP addresses as host identifiers.
+You can use the community-supported version of libs3 (available from
+https://github.com/bji/libs3.git) if Eucalyptus is configured to use
+DNS names for its services.  If not, then you *must* use the forked
+version if libs3 that comes with UCSBluesky so that you can use dotted
+notation with a service path.
 
 To get Bluesky to contact the Walrus endpoint, add 
 
@@ -24,6 +27,12 @@ Eucalyptus cloud.  For example, if "cloud.cs.ucsb.edu" were set up to refer
 to a specific Eucalyptus cloud, then the bash format assignment would be
 
 export S3_HOSTNAME='walrus.cloud.cs.ucsb.edu:8773'
+
+If DNS is not configured for Eucalyptus, it is possible to use dotted 
+notation for Walrus as well, however you must also specify a service path
+
+export S3_HOSTNAME='192.168.1.1:8773'
+export S3_SERVICEPATH="services/Walrus"
 
 Bluesky also assumes that it will be storing its log entries in an S3
 bucket that has already been created.  The default bucket name
